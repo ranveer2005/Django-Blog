@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from .models import Profile
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 
-
+# New import for uploading image
+import requests
+from django.core.files.base import ContentFile
 
 
 def register(request):
@@ -15,7 +17,7 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Your account is now created! You are able to log in')
+            messages.success(request, 'Your account is now created! You are able to log in')
             return redirect('login')
     else:
         form = UserRegisterForm()
@@ -31,7 +33,7 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, f'Your account has been updated')
+            messages.success(request, 'Your account has been updated')
             return redirect('profile')
     else:
         u_form = UserUpdateForm(instance=request.user)
@@ -42,59 +44,16 @@ def profile(request):
         'p_form': p_form
     }
 
-    return render(request, "users/profile.html", context)
+    return render(request, 'users/profile.html', context)
 
 
-# ✅ One-time profile image repair view
-def fix_profile_images(request):
-    default_url = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
-    count = 0
-    failed = []
-
-    for profile in Profile.objects.all():
-        img_path = str(profile.image or "").strip().lower()
-
-        if (
-            not img_path or
-            img_path.startswith("media/") or
-            img_path.startswith("/media/") or
-            "profile_pics" in img_path or
-            img_path.endswith(".jpg") or
-            img_path.endswith(".jpeg")
-        ):
-            try:
-                profile.image = default_url
-                profile.save()
-                count += 1
-            except Exception as e:
-                failed.append((profile.user.username, str(e)))
-
-    return HttpResponse(f"✅ Fixed {count} profile images.<br>❌ Failed: {failed if failed else 'None'}")
-def force_fix_specific_profile(request):
-    default_url = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
-
-    try:
-        user = User.objects.get(username='Ranveer')  # change if needed
-        profile = user.profile
-        profile.image = default_url
-        profile.save()
-        return HttpResponse("✅ Successfully fixed Ranveer's profile image.")
-    except Exception as e:
-        return HttpResponse(f"❌ Failed to fix profile: {e}")
-    
-def show_raw_image_value(request):
-    try:
-        user = User.objects.get(username="Ranveer")  # ✅ change if needed
-        image_value = str(user.profile.image)
-        return HttpResponse(f"🧠 Image value in DB for Ranveer: <br><br><code>{image_value}</code>")
-    except Exception as e:
-        return HttpResponse(f"❌ Error: {e}")
-    
-def force_fix_ranveer(request):
+# ✅ REAL FINAL FIX: Overwrite image using Cloudinary URL upload
+def force_upload_profile_image(request):
     try:
         user = User.objects.get(username="Ranveer")
-        user.profile.image = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
-        user.profile.save()
-        return HttpResponse("✅ Ranveer's profile image has been overwritten with Cloudinary default.")
+        url = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
+        response = requests.get(url)
+        user.profile.image.save("default.jpg", ContentFile(response.content), save=True)
+        return HttpResponse("✅ Cloudinary image has been saved to Ranveer's profile image field.")
     except Exception as e:
         return HttpResponse(f"❌ Error: {e}")

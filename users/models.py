@@ -1,21 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
-from PIL import Image
-
-from django.db import models
-from django.contrib.auth.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(
-        upload_to='profile_pics',
-        default='https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default.jpg'
-    )
+    image = models.ImageField(upload_to='profile_pics', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     current_city = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'
+
 
 
     #def save(self, *args, **kwargs): 
