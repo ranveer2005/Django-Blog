@@ -48,10 +48,22 @@ def fix_profile_images(request):
     count = 0
 
     for profile in Profile.objects.all():
-        image_str = str(profile.image)
-        if not profile.image or image_str.strip() == "" or image_str.startswith("media/") or image_str.startswith("/media/"):
+        image_field = profile.image
+
+        # Convert to string safely
+        image_str = str(image_field or '').strip().lower()
+
+        # Match broken patterns
+        if (
+            not image_str or
+            image_str.startswith('media/') or
+            image_str.startswith('/media/') or
+            'media/profile_pics' in image_str or
+            image_str.endswith('.jpg') or
+            image_str.endswith('.jpeg')
+        ):
             profile.image = default_url
             profile.save()
             count += 1
 
-    return HttpResponse(f"✅ Fixed {count} broken profile images.")
+    return HttpResponse(f"✅ Fixed {count} broken or missing profile images.")
