@@ -12,7 +12,7 @@ def fix_images(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_alter_profile_image.py'),  # Replace with actual last migration
+        ('users', '0002_alter_profile_image'),  # Replace with actual last migration
     ]
 
     operations = [
