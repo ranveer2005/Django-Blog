@@ -2,21 +2,28 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpeg', upload_to='profile_pics')
+    image = models.ImageField(
+        upload_to='profile_pics',
+        default='https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default.jpg'
+    )
     bio = models.TextField(blank=True, null=True)
     current_city = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'
 
-    def save(self, *args, **kwargs): 
-        super().save(*args, **kwargs)  
 
-        img = Image.open(self.image.path)
+    #def save(self, *args, **kwargs): 
+        #super().save(*args, **kwargs)  
 
-        if img.height > 300 or img.width > 300:
-            output_size = (300, 300)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
+        #img = Image.open(self.image.path)
+
+        #if img.height > 300 or img.width > 300:
+           # output_size = (300, 300)
+            #img.thumbnail(output_size)
+            #img.save(self.image.path)
