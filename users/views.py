@@ -46,24 +46,24 @@ def profile(request):
 def fix_profile_images(request):
     default_url = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
     count = 0
+    failed = []
 
     for profile in Profile.objects.all():
-        image_field = profile.image
+        img_path = str(profile.image or "").strip().lower()
 
-        # Convert to string safely
-        image_str = str(image_field or '').strip().lower()
-
-        # Match broken patterns
         if (
-            not image_str or
-            image_str.startswith('media/') or
-            image_str.startswith('/media/') or
-            'media/profile_pics' in image_str or
-            image_str.endswith('.jpg') or
-            image_str.endswith('.jpeg')
+            not img_path or
+            img_path.startswith("media/") or
+            img_path.startswith("/media/") or
+            "profile_pics" in img_path or
+            img_path.endswith(".jpg") or
+            img_path.endswith(".jpeg")
         ):
-            profile.image = default_url
-            profile.save()
-            count += 1
+            try:
+                profile.image = default_url
+                profile.save()
+                count += 1
+            except Exception as e:
+                failed.append((profile.user.username, str(e)))
 
-    return HttpResponse(f"✅ Fixed {count} broken or missing profile images.")
+    return HttpResponse(f"✅ Fixed {count} profile images.<br>❌ Failed: {failed if failed else 'None'}")
