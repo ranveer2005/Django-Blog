@@ -81,3 +81,11 @@ def force_fix_specific_profile(request):
         return HttpResponse("✅ Successfully fixed Ranveer's profile image.")
     except Exception as e:
         return HttpResponse(f"❌ Failed to fix profile: {e}")
+    
+def show_raw_image_value(request):
+    try:
+        user = User.objects.get(username="Ranveer")  # ✅ change if needed
+        image_value = str(user.profile.image)
+        return HttpResponse(f"🧠 Image value in DB for Ranveer: <br><br><code>{image_value}</code>")
+    except Exception as e:
+        return HttpResponse(f"❌ Error: {e}")
