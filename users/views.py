@@ -89,3 +89,12 @@ def show_raw_image_value(request):
         return HttpResponse(f"🧠 Image value in DB for Ranveer: <br><br><code>{image_value}</code>")
     except Exception as e:
         return HttpResponse(f"❌ Error: {e}")
+    
+def force_fix_ranveer(request):
+    try:
+        user = User.objects.get(username="Ranveer")
+        user.profile.image = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
+        user.profile.save()
+        return HttpResponse("✅ Ranveer's profile image has been overwritten with Cloudinary default.")
+    except Exception as e:
+        return HttpResponse(f"❌ Error: {e}")
