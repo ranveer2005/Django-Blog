@@ -4,6 +4,9 @@ from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Profile
+from django.contrib.auth.models import User
+
+
 
 
 def register(request):
@@ -67,3 +70,14 @@ def fix_profile_images(request):
                 failed.append((profile.user.username, str(e)))
 
     return HttpResponse(f"✅ Fixed {count} profile images.<br>❌ Failed: {failed if failed else 'None'}")
+def force_fix_specific_profile(request):
+    default_url = 'https://res.cloudinary.com/dbdqfgqti/image/upload/v1751310469/default_oygkle.jpg'
+
+    try:
+        user = User.objects.get(username='Ranveer')  # change if needed
+        profile = user.profile
+        profile.image = default_url
+        profile.save()
+        return HttpResponse("✅ Successfully fixed Ranveer's profile image.")
+    except Exception as e:
+        return HttpResponse(f"❌ Failed to fix profile: {e}")
