@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: django-blog
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn Django_Project.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: Django_Project.settings
+      - key: SECRET_KEY
+        value: your_production_secret_key
+      - key: DEBUG
+        value: False
